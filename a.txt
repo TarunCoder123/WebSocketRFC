@@ -52,3 +52,14 @@
    such as to signal that the connection should be closed).  This
    version of the protocol defines six frame types and leaves ten
    reserved for future use.
+
+   NOTE: As an example, if the value of the |Sec-WebSocket-Key| header
+   field in the client's handshake were "dGhlIHNhbXBsZSBub25jZQ==", the
+   server would append the string "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+   to form the string "dGhlIHNhbXBsZSBub25jZQ==258EAFA5-E914-47DA-95CA-
+   C5AB0DC85B11".  The server would then take the SHA-1 hash of this
+   string, giving the value 0xb3 0x7a 0x4f 0x2c 0xc0 0x62 0x4f 0x16 0x90
+   0xf6 0x46 0x06 0xcf 0x38 0x59 0x45 0xb2 0xbe 0xc4 0xea.  This value
+   is then base64-encoded, to give the value
+   "s3pPLMBiTxaQ9kYGzzhZRbK+xOo=", which would be returned in the
+   |Sec-WebSocket-Accept| header field.
