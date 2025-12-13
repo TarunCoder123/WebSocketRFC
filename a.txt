@@ -120,3 +120,34 @@
       *  %xA denotes a pong
 
       *  %xB-F are reserved for further control frames
+
+
+      3️⃣ Simple example: fragmented text message
+
+Message:
+
+"Hello WebSocket!"
+
+
+Split into 3 frames:
+
+Frame 1
+Opcode = text
+FIN = 0
+Data = "Hello "
+
+Frame 2
+Opcode = continuation (0)
+FIN = 0
+Data = "Web"
+
+Frame 3
+Opcode = continuation (0)
+FIN = 1
+Data = "Socket!"
+
+Collects frames
+
+Joins the data
+
+Delivers one message: "Hello WebSocket!"
