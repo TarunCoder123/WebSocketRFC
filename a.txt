@@ -42,6 +42,9 @@
    particular network layer framing, as a fragmented message may be
    coalesced or split by an intermediary.
 
+   WebSocket masking scrambles the message data by mixing it with a short
+   4-byte key using XOR, and the message length does not count the key itself.
+
    A frame has an associated type.  Each frame belonging to the same
    message contains the same type of data.  Broadly speaking, there are
    types for textual data (which is interpreted as UTF-8 [RFC3629]
