@@ -11,7 +11,17 @@ app.get("/", (req, res) => {
 });
 
 //Create WS server
-const wss = new WebSocket.Server({ noServer: true });
+const wss = new WebSocket.Server({ noServer: true,port:8080,verifyClient: (info,cb)=>{
+    const origin=String(info.origin || info.req.headers.origin);
+    const allowedOrigin=['http://localhost:3000'];
+
+    if(allowedOrigin.includes(origin)){
+        cb(true);
+    }else{
+        console.warn("Not allowed to talk to the server");
+        cb(false);
+    }
+} });
 console.log("🚀 ~ wss:", wss)
 
 //Handle WebSocket connection
