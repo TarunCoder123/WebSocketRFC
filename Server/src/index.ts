@@ -11,7 +11,7 @@ app.get("/", (req, res) => {
 });
 
 //Create WS server
-const wss = new WebSocket.Server({ noServer: true,port:8080,verifyClient: (info,cb)=>{
+const wss = new WebSocket.Server({port:8080,verifyClient: (info,cb)=>{
     const origin=String(info.origin || info.req.headers.origin);
     const allowedOrigin=['http://localhost:3000'];
 
@@ -19,7 +19,7 @@ const wss = new WebSocket.Server({ noServer: true,port:8080,verifyClient: (info,
         cb(true);
     }else{
         console.warn("Not allowed to talk to the server");
-        cb(false);
+        cb(false,403,'forbidden');
     }
 } });
 console.log("🚀 ~ wss:", wss)
@@ -48,6 +48,6 @@ server.on("upgrade",(req,socket,head)=>{
     }
 });
 
-server.listen(8080, () => console.log("Server runnning on 8080"));
+server.listen(3000, () => console.log("Server runnning on 3000"));
 
 // NDKDE+zJvpnPHtVBmQ0Qzw==
