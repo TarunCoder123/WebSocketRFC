@@ -3,7 +3,7 @@ import React from 'react'
 const App = () => {
 
   const handleClick=()=>{
-    const wsClient=new WebSocket('http://localhost:8080/ws');
+    const wsClient=new WebSocket('http://localhost:3000/ws?token=abc');
     console.log("🚀 ~ handleClick ~ wsClient:", wsClient)
 
   }
