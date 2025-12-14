@@ -12,23 +12,23 @@ app.get("/", (req, res) => {
 });
 
 //Create WS server
-const wss = new WebSocket.Server({
-    noServer: true
-});
 // const wss = new WebSocket.Server({
-//     noServer: true, verifyClient: (info, cb) => {
-//         // During postman
-//         const origin = String(info?.origin || info.req.headers.origin);
-//         const allowedOrigin = ['http://localhost:5173'];
-
-//         if (allowedOrigin.includes(origin)) {
-//             cb(true);
-//         } else {
-//             console.warn("Not allowed to talk to the server");
-//             cb(false, 403, 'forbidden');
-//         }
-//     }
+//     noServer: true
 // });
+const wss = new WebSocket.Server({
+    noServer: true, verifyClient: (info, cb) => {
+        // During postman
+        const origin = String(info?.origin || info.req.headers.origin);
+        const allowedOrigin = ['http://localhost:5173'];
+
+        if (allowedOrigin.includes(origin)) {
+            cb(true);
+        } else {
+            console.warn("Not allowed to talk to the server");
+            cb(false, 403, 'forbidden');
+        }
+    }
+});
 // console.log("🚀 ~ wss:", wss)
 
 const authenticated=(value:string):boolean=>{
@@ -50,6 +50,7 @@ wss.on("connection", (ws) => {
 server.on("upgrade", (req, socket, head) => {
     // console.log("🚀 ~ socket:", socket)
     // console.log("🚀 ~ head:", head)
+    console.log("🚀 ~ req?.url:", req?.url)
     const parsedUrl = parse(String(req?.url));
     console.log("🚀 ~ parsedUrl:", parsedUrl)
     const token = parsedUrl['/ws?token'];
@@ -64,7 +65,7 @@ server.on("upgrade", (req, socket, head) => {
     }
 
 
-    if (req.url === "/ws") {
+    if (req.url === "/ws?token=abc") {
         console.log("inside");
         wss.handleUpgrade(req, socket, head, (ws) => {
             // console.log(ws);
