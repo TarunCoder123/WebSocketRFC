@@ -13,19 +13,22 @@ app.get("/", (req, res) => {
 
 //Create WS server
 const wss = new WebSocket.Server({
-    noServer: true, verifyClient: (info, cb) => {
-        // During postman
-        const origin = String(info?.origin || info.req.headers.origin);
-        const allowedOrigin = ['http://localhost:5173'];
-
-        if (allowedOrigin.includes(origin)) {
-            cb(true);
-        } else {
-            console.warn("Not allowed to talk to the server");
-            cb(false, 403, 'forbidden');
-        }
-    }
+    noServer: true
 });
+// const wss = new WebSocket.Server({
+//     noServer: true, verifyClient: (info, cb) => {
+//         // During postman
+//         const origin = String(info?.origin || info.req.headers.origin);
+//         const allowedOrigin = ['http://localhost:5173'];
+
+//         if (allowedOrigin.includes(origin)) {
+//             cb(true);
+//         } else {
+//             console.warn("Not allowed to talk to the server");
+//             cb(false, 403, 'forbidden');
+//         }
+//     }
+// });
 // console.log("🚀 ~ wss:", wss)
 
 const authenticated=(value:string):boolean=>{
@@ -45,17 +48,18 @@ wss.on("connection", (ws) => {
 
 //Upgrad HTTP -> WebSocket
 server.on("upgrade", (req, socket, head) => {
-    console.log("🚀 ~ socket:", socket)
-    console.log("🚀 ~ head:", head)
+    // console.log("🚀 ~ socket:", socket)
+    // console.log("🚀 ~ head:", head)
     const parsedUrl = parse(String(req?.url));
-    const token = parsedUrl['/?token'];
+    console.log("🚀 ~ parsedUrl:", parsedUrl)
+    const token = parsedUrl['/ws?token'];
 
     console.log(token); 
 
     if(!authenticated(String(token))){
+        console.log("andhaar ayaa hai na bhia ")
         socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
         socket.destroy();
-        console.log("🚀 ~ socket:", socket)
         return;
     }
 
