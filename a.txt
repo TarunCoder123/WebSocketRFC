@@ -38,10 +38,12 @@
    After a successful handshake, clients and servers transfer data back
    and forth in conceptual units referred to in this specification as
    "messages".  On the wire, a message is composed of one or more
-
    frames.  The WebSocket message does not necessarily correspond to a
    particular network layer framing, as a fragmented message may be
    coalesced or split by an intermediary.
+
+   WebSocket masking scrambles the message data by mixing it with a short
+   4-byte key using XOR, and the message length does not count the key itself.
 
    A frame has an associated type.  Each frame belonging to the same
    message contains the same type of data.  Broadly speaking, there are
@@ -52,3 +54,107 @@
    such as to signal that the connection should be closed).  This
    version of the protocol defines six frame types and leaves ten
    reserved for future use.
+
+   NOTE: As an example, if the value of the |Sec-WebSocket-Key| header
+   field in the client's handshake were "dGhlIHNhbXBsZSBub25jZQ==", the
+   server would append the string "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+   to form the string "dGhlIHNhbXBsZSBub25jZQ==258EAFA5-E914-47DA-95CA-
+   C5AB0DC85B11".  The server would then take the SHA-1 hash of this
+   string, giving the value 0xb3 0x7a 0x4f 0x2c 0xc0 0x62 0x4f 0x16 0x90
+   0xf6 0x46 0x06 0xcf 0x38 0x59 0x45 0xb2 0xbe 0xc4 0xea.  This value
+   is then base64-encoded, to give the value
+   "s3pPLMBiTxaQ9kYGzzhZRbK+xOo=", which would be returned in the
+   |Sec-WebSocket-Accept| header field.
+
+
+      0                   1                   2                   3
+      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+     +-+-+-+-+-------+-+-------------+-------------------------------+
+     |F|R|R|R| opcode|M| Payload len |    Extended payload length    |
+     |I|S|S|S|  (4)  |A|     (7)     |             (16/64)           |
+     |N|V|V|V|       |S|             |   (if payload len==126/127)   |
+     | |1|2|3|       |K|             |                               |
+     +-+-+-+-+-------+-+-------------+ - - - - - - - - - - - - - - - +
+     |     Extended payload length continued, if payload len == 127  |
+     + - - - - - - - - - - - - - - - +-------------------------------+
+     |                               |Masking-key, if MASK set to 1  |
+     +-------------------------------+-------------------------------+
+     | Masking-key (continued)       |          Payload Data         |
+     +-------------------------------- - - - - - - - - - - - - - - - +
+     :                     Payload Data continued ...                :
+     + - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
+     |                     Payload Data continued ...                |
+     +---------------------------------------------------------------+
+
+   FIN:  1 bit
+
+      Indicates that this is the final fragment in a message.  The first
+      fragment MAY also be the final fragment.
+
+   RSV1, RSV2, RSV3:  1 bit each
+
+      MUST be 0 unless an extension is negotiated that defines meanings
+      for non-zero values.  If a nonzero value is received and none of
+      the negotiated extensions defines the meaning of such a nonzero
+      value, the receiving endpoint MUST _Fail the WebSocket
+      Connection_.
+
+   Opcode:  4 bits
+
+      Defines the interpretation of the "Payload data".  If an unknown
+      opcode is received, the receiving endpoint MUST _Fail the
+      WebSocket Connection_.  The following values are defined.
+
+      *  %x0 denotes a continuation frame
+
+      *  %x1 denotes a text frame
+
+      *  %x2 denotes a binary frame
+
+      *  %x3-7 are reserved for further non-control frames
+
+      *  %x8 denotes a connection close
+
+      *  %x9 denotes a ping
+
+      *  %xA denotes a pong
+
+      *  %xB-F are reserved for further control frames
+
+
+      3️⃣ Simple example: fragmented text message
+
+Message:
+
+"Hello WebSocket!"
+
+
+Split into 3 frames:
+
+Frame 1
+Opcode = text
+FIN = 0
+Data = "Hello "
+
+Frame 2
+Opcode = continuation (0)
+FIN = 0
+Data = "Web"
+
+Frame 3
+Opcode = continuation (0)
+FIN = 1
+Data = "Socket!"
+
+Collects frames
+
+Joins the data
+
+Delivers one message: "Hello WebSocket!"
+
+   To _Close the WebSocket Connection_, an endpoint closes the
+   underlying TCP connection.  An endpoint SHOULD use a method that
+   cleanly closes the TCP connection, as well as the TLS session, if
+   applicable, discarding any trailing bytes that may have been
+   received.  An endpoint MAY close the connection via any means
+   available when necessary, such as when under attack.
