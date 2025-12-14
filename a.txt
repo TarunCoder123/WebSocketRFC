@@ -151,3 +151,10 @@ Collects frames
 Joins the data
 
 Delivers one message: "Hello WebSocket!"
+
+   To _Close the WebSocket Connection_, an endpoint closes the
+   underlying TCP connection.  An endpoint SHOULD use a method that
+   cleanly closes the TCP connection, as well as the TLS session, if
+   applicable, discarding any trailing bytes that may have been
+   received.  An endpoint MAY close the connection via any means
+   available when necessary, such as when under attack.
